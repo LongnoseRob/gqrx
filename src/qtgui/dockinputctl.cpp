@@ -484,6 +484,25 @@ void DockInputCtl::on_antSelector_currentIndexChanged(const QString &antenna)
     emit antennaSelected(antenna);
 }
 
+/** Band specific gain settings added
+ * usefull for automated tracking os satelites w/ GQRX to reduce operators workload if
+ * band change would requre gain changes
+ *
+ */
+void DockInputCtl::on_useGaintable_toggled(bool checked)
+{
+    emit useGainTableChanged(checked);
+
+}
+/** button to open the gain table editor
+ */
+
+void DockInputCtl::on_editGaintable_clicked(bool checked)
+{
+    emit editGaintablechanged(checked);
+
+}
+
 /** Remove all widgets from the lists. */
 void DockInputCtl::clearWidgets()
 {

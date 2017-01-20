@@ -124,6 +124,12 @@ private slots:
 
     void sliderValueChanged(int value);
 
+    void on_useGaintable_clicked();
+
+    void on_useGaintable_toggled(bool checked);
+
+    void on_editGaintable_clicked(bool checked);
+
 private:
     void clearWidgets();
     void updateLabel(int idx, double value);

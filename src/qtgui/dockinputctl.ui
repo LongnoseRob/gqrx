@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>240</width>
-    <height>240</height>
+    <width>258</width>
+    <height>307</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>240</width>
-    <height>240</height>
+    <width>258</width>
+    <height>307</height>
    </size>
   </property>
   <property name="windowIcon">
@@ -31,21 +31,6 @@
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <layout class="QVBoxLayout" name="verticalLayout">
-    <property name="spacing">
-     <number>6</number>
-    </property>
-    <property name="leftMargin">
-     <number>5</number>
-    </property>
-    <property name="topMargin">
-     <number>5</number>
-    </property>
-    <property name="rightMargin">
-     <number>5</number>
-    </property>
-    <property name="bottomMargin">
-     <number>5</number>
-    </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
@@ -100,6 +85,24 @@
         </property>
         <property name="text">
          <string>Hardware AGC</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="useGaintable">
+        <property name="text">
+         <string>Band based gain settings</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="editGaintable">
+        <property name="text">
+         <string>Edit gain table</string>
         </property>
        </widget>
       </item>
