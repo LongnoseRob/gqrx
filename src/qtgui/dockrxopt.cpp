@@ -75,18 +75,21 @@ DockRxOpt::DockRxOpt(qint64 filterOffsetRange, QWidget *parent) :
     ui->modeButton->setAttribute(Qt::WA_LayoutUsesWidgetRect);
     ui->agcButton->setAttribute(Qt::WA_LayoutUsesWidgetRect);
     ui->autoSquelchButton->setAttribute(Qt::WA_LayoutUsesWidgetRect);
+    ui->resetSquelchButton->setAttribute(Qt::WA_LayoutUsesWidgetRect);
 #endif
 
 #ifdef Q_OS_LINUX
     ui->modeButton->setMinimumSize(32, 24);
     ui->agcButton->setMinimumSize(32, 24);
     ui->autoSquelchButton->setMinimumSize(32, 24);
+    ui->resetSquelchButton->setMinimumSize(32, 24);
     ui->nbOptButton->setMinimumSize(32, 24);
     ui->nb2Button->setMinimumSize(32, 24);
     ui->nb1Button->setMinimumSize(32, 24);
 #endif
 
-    ui->filterFreq->setup(7, -filterOffsetRange/2, filterOffsetRange/2, 1, UNITS_KHZ);
+    ui->filterFreq->setup(7, -filterOffsetRange/2, filterOffsetRange/2, 1,
+                          FCTL_UNIT_KHZ);
     ui->filterFreq->setFrequency(0);
 
     // use same slot for filteCombo and filterShapeCombo
@@ -137,7 +140,7 @@ void DockRxOpt::setFilterOffset(qint64 freq_hz)
 void DockRxOpt::setFilterOffsetRange(qint64 range_hz)
 {
     if (range_hz > 0)
-        ui->filterFreq->setup(7, -range_hz/2, range_hz/2, 1, UNITS_KHZ);
+        ui->filterFreq->setup(7, -range_hz/2, range_hz/2, 1, FCTL_UNIT_KHZ);
 }
 
 /**
@@ -565,6 +568,11 @@ void DockRxOpt::on_autoSquelchButton_clicked()
 {
     double newval = sqlAutoClicked(); // FIXME: We rely on signal only being connected to one slot
     ui->sqlSpinBox->setValue(newval);
+}
+
+void DockRxOpt::on_resetSquelchButton_clicked()
+{
+    ui->sqlSpinBox->setValue(-150.0);
 }
 
 /** AGC preset has changed. */

@@ -5,6 +5,7 @@
        NEW: Restore remote control state between sessions.
        NEW: Support for passband when setting mode through remote.
        NEW: Widget to enter receiver frequency.
+       NEW: Button to reset squelch to its default (-150 dB) value.
      FIXED: Keep waterfall zoom level and zoom slider synchronised.
      FIXED: RDS status is not kept while jumping through bookmark.
      FIXED: .conf files are deleted when changes are saved.
@@ -15,6 +16,7 @@
   IMPROVED: Voiceover interface.
   IMPROVED: Input decimator performance.
   IMPROVED: Increased frequency limit to 999 GHz (500 GHz LO).
+  IMPROVED: Hamradio style frequency display.
   IMPROVED: More short waterfall time spans.
 
 
