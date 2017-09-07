@@ -7,7 +7,7 @@ set(${PROJECT_NAME}_MINOR "7")
 set(${PROJECT_NAME}_PATCH "0")
 ##set(VERSION "${${PROJECT_NAME}_MAJOR}.${${PROJECT_NAME}_MINOR}.${${PROJECT_NAME}_PATCH}")
 ##set(VERSION "${${PROJECT_NAME}_MAJOR}.${${PROJECT_NAME}_MINOR}")
-add_definitions(-DVERSION="${VERSION}")
+##add_definitions(-DVERSION="${VERSION}")
 
 # development version
 execute_process(
@@ -163,6 +163,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/include
     ${Boost_INCLUDE_DIRS}
     ${GNURADIO_RUNTIME_INCLUDE_DIRS}
+    ${GNURADIO_OSMOSDR_INCLUDE_DIRS}
 )
 
 link_directories(

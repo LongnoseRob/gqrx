@@ -82,6 +82,7 @@ public:
 public slots:
     void setNewFrequency(qint64 freq);
     void setFilterOffset(qint64 freq);
+    void setLnbLo(double freq_mhz);
     void setBandwidth(qint64 bw);
     void setSignalLevel(float level);
     void setMode(int mode);
@@ -93,6 +94,7 @@ public slots:
 signals:
     void newFrequency(qint64 freq);
     void newFilterOffset(qint64 offset);
+    void newLnbLo(double freq_mhz);
     void newMode(int mode);
     void newPassband(int passband);
     void newSquelchLevel(double level);
@@ -112,8 +114,13 @@ private:
     
     qint64      rc_freq;
     qint64      rc_filter_offset;
+<<<<<<< HEAD
     qint64      bw_full;
     int         bw_win_ratio;
+=======
+    qint64      bw_half;
+    double      rc_lnb_lo_mhz;     /*!< Current LNB LO freq in MHz */
+>>>>>>> 0a9a4ba9acc2988844d0a9b71bfe528f4c84bf66
 
     int         rc_mode;           /*!< Current mode. */
     int         rc_passband_lo;    /*!< Current low cutoff. */
@@ -144,6 +151,7 @@ private:
     QString     cmd_get_info() const;
     QString     cmd_AOS();
     QString     cmd_LOS();
+    QString     cmd_lnb_lo(QStringList cmdlist);
     QString     cmd_dump_state() const;
 };
 
