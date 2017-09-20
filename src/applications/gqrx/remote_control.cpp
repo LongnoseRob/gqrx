@@ -312,25 +312,28 @@ void RemoteControl::setPassband(int passband_lo, int passband_hi)
 void RemoteControl::setNewRemoteFreq(qint64 freq)
 {
     qint64 delta = freq - rc_freq;
+<<<<<<< HEAD
     // we want to leave some margin
     qint64 bw_half = (double)bw_win_ratio / 100 * bw_full / 2;
+=======
+    qint64 bwh_eff = 0.8f * (float)bw_half;
+>>>>>>> 514a08ad5096fba4bf76035f7e9ffbad19f8350c
 
     rc_filter_offset += delta;
-    if (((rc_filter_offset > 0) && ((rc_filter_offset + rc_passband_hi) < bw_half))
-        || ((rc_filter_offset < 0) && ((rc_filter_offset + rc_passband_lo) > -bw_half)))
+    if ((rc_filter_offset > 0 && rc_filter_offset + rc_passband_hi < bwh_eff) ||
+        (rc_filter_offset < 0 && rc_filter_offset + rc_passband_lo > -bwh_eff))
     {
         // move filter offset
         emit newFilterOffset(rc_filter_offset);
     }
     else
     {
-        // move rx freqeucy and let MainWindow deal with it
-        // (will usually change hardware PLL)
-        // reset the filter_offset, otherwise the MainWindow will preserve it
+        // moving filter offset would push it too close to or beyond the edge
+        // move it close to the center and adjust hardware freq
         if (rc_filter_offset < 0)
-            rc_filter_offset = bw_half - rc_passband_hi;
+            rc_filter_offset = -0.2f * bwh_eff;
         else
-            rc_filter_offset = -bw_half - rc_passband_lo;
+            rc_filter_offset = 0.2f * bwh_eff;
         emit newFilterOffset(rc_filter_offset);
         emit newFrequency(freq);
     }

@@ -114,13 +114,10 @@ private:
     
     qint64      rc_freq;
     qint64      rc_filter_offset;
-<<<<<<< HEAD
     qint64      bw_full;
     int         bw_win_ratio;
-=======
     qint64      bw_half;
     double      rc_lnb_lo_mhz;     /*!< Current LNB LO freq in MHz */
->>>>>>> 0a9a4ba9acc2988844d0a9b71bfe528f4c84bf66
 
     int         rc_mode;           /*!< Current mode. */
     int         rc_passband_lo;    /*!< Current low cutoff. */
