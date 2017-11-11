@@ -38,7 +38,14 @@ RemoteControl::RemoteControl(QObject *parent) :
 
     rc_freq = 0;
     rc_filter_offset = 0;
+<<<<<<< HEAD
+=======
+    bw_half = 740e3;
+    rc_lnb_lo_mhz = 0.0;
+>>>>>>> 1503682202ea11afebeccba25d2f345d849e83c2
     rc_mode = 0;
+    rc_passband_lo = 0;
+    rc_passband_hi = 0;
     signal_level = -200.0;
     squelch_level = -150.0;
     audio_recorder_status = false;
@@ -124,7 +131,7 @@ void RemoteControl::saveSettings(QSettings *settings) const
     else
         settings->remove("port");
 
-    if ((rc_allowed_hosts.count() != 1) || (rc_allowed_hosts.at(0) != DEFAULT_RC_ALLOWED_HOSTS))
+    if (rc_allowed_hosts.count() > 0)
         settings->setValue("allowed_hosts", rc_allowed_hosts);
     else
         settings->remove("allowed_hosts");
@@ -283,7 +290,12 @@ void RemoteControl::setLnbLo(double freq_mhz)
 
 void RemoteControl::setBandwidth(qint64 bw)
 {
+<<<<<<< HEAD
     bw_full = bw;
+=======
+    // we want to leave some margin
+    bw_half = (qint64)(0.9f * (bw / 2.f));
+>>>>>>> 1503682202ea11afebeccba25d2f345d849e83c2
 }
 
 /*! \brief Set signal level in dBFS. */
