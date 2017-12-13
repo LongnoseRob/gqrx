@@ -67,14 +67,14 @@ CONFIG(debug, debug|release) {
     #QMAKE_CFLAGS_DEBUG += '-g -O0'
 
     # Define version string (see below for releases)
-    ##VER = $$system(git describe --abbrev=8)
-    VER = 2.9
+    VER = $$system(git describe --abbrev=8)
+    ##VER = 2.9
 
 } else {
     DEFINES += QT_NO_DEBUG
     DEFINES += QT_NO_DEBUG_OUTPUT
-    ##VER = $$system(git describe --abbrev=1)
-    VER = 2.9
+    VER = $$system(git describe --abbrev=1)
+    ##VER = 2.9
 
     # Release binaries with gr bundled
     # QMAKE_RPATH & co won't work with origin
@@ -158,6 +158,7 @@ HEADERS += \
     src/dsp/rds/decoder_impl.h \
     src/dsp/rds/parser_impl.h \
     src/dsp/rds/constants.h \
+    src/dsp/rds/tmc_events.h \
     src/dsp/resampler_xx.h \
     src/dsp/rx_agc_xx.h \
     src/dsp/rx_demod_am.h \
