@@ -84,8 +84,11 @@ void RemoteControl::start_server()
 /*! \brief Stop the server. */
 void RemoteControl::stop_server()
 {
-    if (rc_socket != 0)
+    if (rc_socket != 0) {
         rc_socket->close();
+        delete rc_socket;
+        rc_socket = 0;
+    }
 
     if (rc_server.isListening())
         rc_server.close();
@@ -176,6 +179,11 @@ void RemoteControl::setHosts(QStringList hosts)
  */
 void RemoteControl::acceptConnection()
 {
+    if (rc_socket)
+    {
+        rc_socket->close();
+        delete rc_socket;
+    }
     rc_socket = rc_server.nextPendingConnection();
 
     // check if host is allowed
@@ -185,6 +193,8 @@ void RemoteControl::acceptConnection()
         std::cout << "*** Remote connection attempt from " << address.toStdString()
                   << " (not in allowed list)" << std::endl;
         rc_socket->close();
+        delete rc_socket;
+        rc_socket = 0;
     }
     else
     {
@@ -251,6 +261,8 @@ void RemoteControl::startRead()
     {
         // FIXME: for now we assume 'close' command
         rc_socket->close();
+        delete rc_socket;
+        rc_socket = 0;
         return;
     }
     else

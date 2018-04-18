@@ -193,17 +193,21 @@ CIoConfig::~CIoConfig()
  */
 void CIoConfig::getDeviceList(std::map<QString, QVariant> &devList)
 {
-    unsigned int i=0;
-    QString devstr;
-    QString devlabel;
+    QString         devstr;
+    QString         devlabel;
 
-#if defined(GQRX_OS_MACX)
     // automatic discovery of FCD does not work on Mac
     // so we do it ourselves
-    osxaudio_device_list devices;
-    vector<osxaudio_device> inDevList = devices.get_input_devices();
-
+#if defined(GQRX_OS_MACX)
+#ifdef WITH_PORTAUDIO
+    portaudio_device_list       devices;
+    vector<portaudio_device>    inDevList = devices.get_input_devices();
+#else
+    osxaudio_device_list        devices;
+    vector<osxaudio_device>     inDevList = devices.get_input_devices();
+#endif
     string this_dev;
+    int i;
     for (i = 0; i < inDevList.size(); i++)
     {
         this_dev = inDevList[i].get_name();
@@ -249,9 +253,7 @@ void CIoConfig::getDeviceList(std::map<QString, QVariant> &devList)
 
         devstr = QString(dev.to_string().c_str());
         devList.insert(std::pair<QString, QVariant>(devlabel, devstr));
-
-        qDebug() << "   " << i << ":"  << devlabel;
-        ++i;
+        qDebug() << "  " << devlabel;
     }
 }
 
@@ -266,7 +268,7 @@ void CIoConfig::saveConfig()
 
     idx = ui->outDevCombo->currentIndex();
 
-#if defined(WITH_PULSEAUDIO) || defined(GQRX_OS_MACX)
+#if defined(WITH_PULSEAUDIO) || defined(WITH_PORTAUDIO) || defined(GQRX_OS_MACX)
     if (idx > 0)
     {
           qDebug() << "Output device" << idx << ":" << QString(outDevList[idx-1].get_name().c_str());
@@ -531,8 +533,12 @@ void CIoConfig::updateInputSampleRates(int rate)
     }
     else if (ui->inDevEdit->text().contains("sdrplay"))
     {
+        ui->inSrCombo->addItem("62500");
+        ui->inSrCombo->addItem("125000");
+        ui->inSrCombo->addItem("250000");
+        ui->inSrCombo->addItem("500000");
+        ui->inSrCombo->addItem("1000000");
         ui->inSrCombo->addItem("2000000");
-        ui->inSrCombo->addItem("2048000");
         ui->inSrCombo->addItem("3000000");
         ui->inSrCombo->addItem("4000000");
         ui->inSrCombo->addItem("5000000");
@@ -543,15 +549,15 @@ void CIoConfig::updateInputSampleRates(int rate)
         ui->inSrCombo->addItem("10000000");
         if (rate > 0)
         {
-            if (rate < 2000000)
-                rate = 2000000;
+            if (rate < 62500)
+                rate = 62500;
             if (rate > 10000000)
                 rate = 10000000;
             ui->inSrCombo->insertItem(0, QString("%1").arg(rate));
             ui->inSrCombo->setCurrentIndex(0);
         }
         else
-            ui->inSrCombo->setCurrentIndex(1); // select 2048 kHz
+            ui->inSrCombo->setCurrentIndex(5); // select 2 MHz
     }
     else if (ui->inDevEdit->text().contains("lime"))
     {
@@ -589,6 +595,26 @@ void CIoConfig::updateInputSampleRates(int rate)
         }
         else
             ui->inSrCombo->setCurrentIndex(2); // select 2 MHz
+    }
+    else if (ui->inDevEdit->text().contains("perseus"))
+    {
+        ui->inSrCombo->addItem("48000");
+        ui->inSrCombo->addItem("95000");
+        ui->inSrCombo->addItem("96000");
+        ui->inSrCombo->addItem("125000");
+        ui->inSrCombo->addItem("192000");
+        ui->inSrCombo->addItem("250000");
+        ui->inSrCombo->addItem("500000");
+        ui->inSrCombo->addItem("1000000");
+        ui->inSrCombo->addItem("1600000");
+        ui->inSrCombo->addItem("2000000");
+        if (rate > 0)
+        {
+            ui->inSrCombo->insertItem(0, QString("%1").arg(rate));
+            ui->inSrCombo->setCurrentIndex(0);
+        }
+        else
+            ui->inSrCombo->setCurrentIndex(4); // select 192 kHz
     }
     else
     {

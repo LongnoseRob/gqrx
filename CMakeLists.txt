@@ -3,11 +3,11 @@ cmake_minimum_required(VERSION 2.8.0)
 # Project name
 project(gqrx)
 set(${PROJECT_NAME}_MAJOR "2")
-set(${PROJECT_NAME}_MINOR "9")
-set(${PROJECT_NAME}_PATCH "0")
-##set(VERSION "${${PROJECT_NAME}_MAJOR}.${${PROJECT_NAME}_MINOR}.${${PROJECT_NAME}_PATCH}")
+set(${PROJECT_NAME}_MINOR "11")
+set(${PROJECT_NAME}_PATCH "4")
+set(VERSION "${${PROJECT_NAME}_MAJOR}.${${PROJECT_NAME}_MINOR}.${${PROJECT_NAME}_PATCH}")
 ##set(VERSION "${${PROJECT_NAME}_MAJOR}.${${PROJECT_NAME}_MINOR}")
-##add_definitions(-DVERSION="${VERSION}")
+add_definitions(-DVERSION="${VERSION}")
 
 # development version
 execute_process(
@@ -16,7 +16,7 @@ execute_process(
     OUTPUT_VARIABLE GITVERSION
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-add_definitions(-DVERSION="${GITVERSION}")
+##add_definitions(-DVERSION="${GITVERSION}")
 
 set(PACKAGE ${PROJECT_NAME})
 
@@ -110,7 +110,7 @@ endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     if(NOT LINUX_AUDIO_BACKEND)
-        set(LINUX_AUDIO_BACKEND Pulseaudio CACHE STRING "Choose the audio backend, options are: Pulseaudio, Gr-audio" FORCE)
+        set(LINUX_AUDIO_BACKEND Pulseaudio CACHE STRING "Choose the audio backend, options are: Pulseaudio, Portaudio, Gr-audio" FORCE)
     endif()
 
     if(${LINUX_AUDIO_BACKEND} MATCHES "Pulseaudio")
@@ -142,6 +142,36 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
         unset(PORTAUDIO_LIBRARIES CACHE)
     else()
         message(FATAL_ERROR "Invalid audio backend: should be either Pulseaudio, Portaudio or Gr-audio")
+    endif()
+endif()
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    if(NOT OSX_AUDIO_BACKEND)
+        set(OSX_AUDIO_BACKEND Portaudio CACHE STRING "Choose the audio backend, options are: Portaudio and Gr-audio" FORCE)
+    endif()
+
+    if(${OSX_AUDIO_BACKEND} MATCHES "Portaudio")
+        find_package(Portaudio REQUIRED)
+        add_definitions(-DWITH_PORTAUDIO)
+        unset(PULSEAUDIO_FOUND CACHE)
+        unset(PULSEAUDIO_INCLUDE_DIR CACHE)
+        unset(PULSEAUDIO_LIBRARY CACHE)
+        unset(PulseAudio_DIR CACHE)
+        unset(PULSE-SIMPLE CACHE)
+        unset(PULSEAUDIO_INCLUDE_DIR CACHE)
+        unset(PULSEAUDIO_MAINLOOP_LIBRARY CACHE)
+    elseif(${OSX_AUDIO_BACKEND} MATCHES "Gr-audio")
+        unset(PULSEAUDIO_FOUND CACHE)
+        unset(PULSEAUDIO_INCLUDE_DIR CACHE)
+        unset(PULSEAUDIO_LIBRARY CACHE)
+        unset(PulseAudio_DIR CACHE)
+        unset(PULSE-SIMPLE CACHE)
+        unset(PULSEAUDIO_INCLUDE_DIR CACHE)
+        unset(PULSEAUDIO_MAINLOOP_LIBRARY CACHE)
+        unset(PORTAUDIO_INCLUDE_DIRS CACHE)
+        unset(PORTAUDIO_LIBRARIES CACHE)
+    else()
+        message(FATAL_ERROR "Invalid audio backend: should be either Portaudio or Gr-audio")
     endif()
 endif()
 

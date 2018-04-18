@@ -226,6 +226,7 @@ MainWindow::MainWindow(const QString cfgfile, bool edit_conf, QWidget *parent) :
     connect(uiDockAudio, SIGNAL(fftRateChanged(int)), this, SLOT(setAudioFftRate(int)));
     connect(uiDockFft, SIGNAL(fftSizeChanged(int)), this, SLOT(setIqFftSize(int)));
     connect(uiDockFft, SIGNAL(fftRateChanged(int)), this, SLOT(setIqFftRate(int)));
+    connect(uiDockFft, SIGNAL(fftWindowChanged(int)), this, SLOT(setIqFftWindow(int)));
     connect(uiDockFft, SIGNAL(wfSpanChanged(quint64)), this, SLOT(setWfTimeSpan(quint64)));
     connect(uiDockFft, SIGNAL(fftSplitChanged(int)), this, SLOT(setIqFftSplit(int)));
     connect(uiDockFft, SIGNAL(fftAvgChanged(float)), this, SLOT(setIqFftAvg(float)));
@@ -878,11 +879,8 @@ void MainWindow::setGain(QString name, double gain)
 void MainWindow::setAutoGain(bool enabled)
 {
     rx->set_auto_gain(enabled);
-
     if (!enabled)
-    {
-        uiDockInputCtl->restoreManualGains(m_settings);
-    }
+        uiDockInputCtl->restoreManualGains();
 }
 
 /**
@@ -1218,6 +1216,7 @@ void MainWindow::setNoiseBlanker(int nbid, bool on, float threshold)
 void MainWindow::setSqlLevel(double level_db)
 {
     rx->set_sql_level(level_db);
+    ui->sMeter->setSqlLevel(level_db);
 }
 
 /**
@@ -1227,6 +1226,9 @@ void MainWindow::setSqlLevel(double level_db)
 double MainWindow::setSqlLevelAuto()
 {
     double level = rx->get_signal_pwr(true) + 1.0;
+    if (level > -10.0)  // avoid 0 dBFS
+        level = uiDockRxOpt->getSqlLevel();
+
     setSqlLevel(level);
     return level;
 }
@@ -1492,7 +1494,7 @@ void MainWindow::startIqPlayback(const QString filename, float samprate)
     storeSession();
 
     int sri = (int)samprate;
-    QString devstr = QString("file=%1,rate=%2,throttle=true,repeat=false")
+    QString devstr = QString("file='%1',rate=%2,throttle=true,repeat=false")
             .arg(filename).arg(sri);
 
     qDebug() << __func__ << ":" << devstr;
@@ -1601,6 +1603,11 @@ void MainWindow::setIqFftRate(int fps)
 
     if (interval > 9 && iq_fft_timer->isActive())
         iq_fft_timer->setInterval(interval);
+}
+
+void MainWindow::setIqFftWindow(int type)
+{
+    rx->set_iq_fft_window(type);
 }
 
 /** Waterfall time span has changed. */
@@ -2190,12 +2197,12 @@ void MainWindow::on_actionAbout_triggered()
 {
     QMessageBox::about(this, tr("About Gqrx"),
         tr("<p>This is Gqrx %1</p>"
-           "<p>Copyright (C) 2011-2017 Alexandru Csete & contributors.</p>"
+           "<p>Copyright (C) 2011-2018 Alexandru Csete & contributors.</p>"
            "<p>Gqrx is a software defined radio (SDR) receiver powered by "
            "<a href='http://www.gnuradio.org/'>GNU Radio</a> and the Qt toolkit. "
-           "<p>Gqrx uses the <a href='http://sdr.osmocom.org/trac/wiki/GrOsmoSDR'>GrOsmoSDR</a> "
+           "<p>Gqrx uses the <a href='https://osmocom.org/projects/sdr/wiki/GrOsmoSDR'>GrOsmoSDR</a> "
            "input source block and and works with any input device supported by it, including "
-           "Funcube Dongles, RTL-SDR, Airspy, HackRF, RFSpace, BladeRF and USRP receivers."
+           "Funcube Dongle, RTL-SDR, Airspy, HackRF, RFSpace, BladeRF and USRP receivers."
            "</p>"
            "<p>You can download the latest version from the "
            "<a href='http://gqrx.dk/'>Gqrx website</a>."
