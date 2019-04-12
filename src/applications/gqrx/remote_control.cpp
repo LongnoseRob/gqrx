@@ -30,6 +30,7 @@
 
 #define DEFAULT_RC_PORT            7356
 #define DEFAULT_RC_ALLOWED_HOSTS   "::ffff:127.0.0.1"
+#define DEFAULT_RC_BW_WIN_RATIO    70
 
 RemoteControl::RemoteControl(QObject *parent) :
     QObject(parent)
@@ -37,8 +38,11 @@ RemoteControl::RemoteControl(QObject *parent) :
 
     rc_freq = 0;
     rc_filter_offset = 0;
+<<<<<<< HEAD
+=======
     bw_half = 740e3;
     rc_lnb_lo_mhz = 0.0;
+>>>>>>> 1503682202ea11afebeccba25d2f345d849e83c2
     rc_mode = 0;
     rc_passband_lo = 0;
     rc_passband_hi = 0;
@@ -47,6 +51,7 @@ RemoteControl::RemoteControl(QObject *parent) :
     audio_recorder_status = false;
     receiver_running = false;
     hamlib_compatible = false;
+    bw_win_ratio = DEFAULT_RC_BW_WIN_RATIO;
 
     rc_port = DEFAULT_RC_PORT;
     rc_allowed_hosts.append(DEFAULT_RC_ALLOWED_HOSTS);
@@ -106,6 +111,9 @@ void RemoteControl::readSettings(QSettings *settings)
     if (settings->contains("allowed_hosts"))
         setHosts(settings->value("allowed_hosts").toStringList());
 
+    if (settings->contains("bw_win_ratio"))
+        bw_win_ratio = settings->value("bw_win_ratio").toInt();
+
     settings->endGroup();
 }
 
@@ -130,6 +138,12 @@ void RemoteControl::saveSettings(QSettings *settings) const
         settings->setValue("allowed_hosts", rc_allowed_hosts);
     else
         settings->remove("allowed_hosts");
+
+    if (bw_win_ratio != DEFAULT_RC_BW_WIN_RATIO)
+        settings->setValue("bw_win_ratio", bw_win_ratio);
+    else
+        settings->remove("bw_win_ratio");
+
 
     settings->endGroup();
 }
@@ -288,8 +302,12 @@ void RemoteControl::setLnbLo(double freq_mhz)
 
 void RemoteControl::setBandwidth(qint64 bw)
 {
+<<<<<<< HEAD
+    bw_full = bw;
+=======
     // we want to leave some margin
     bw_half = (qint64)(0.9f * (bw / 2.f));
+>>>>>>> 1503682202ea11afebeccba25d2f345d849e83c2
 }
 
 /*! \brief Set signal level in dBFS. */
@@ -318,7 +336,12 @@ void RemoteControl::setPassband(int passband_lo, int passband_hi)
 void RemoteControl::setNewRemoteFreq(qint64 freq)
 {
     qint64 delta = freq - rc_freq;
+<<<<<<< HEAD
+    // we want to leave some margin
+    qint64 bw_half = (double)bw_win_ratio / 100 * bw_full / 2;
+=======
     qint64 bwh_eff = 0.8f * (float)bw_half;
+>>>>>>> 514a08ad5096fba4bf76035f7e9ffbad19f8350c
 
     rc_filter_offset += delta;
     if ((rc_filter_offset > 0 && rc_filter_offset + rc_passband_hi < bwh_eff) ||
@@ -620,9 +643,11 @@ QString RemoteControl::cmd_get_func(QStringList cmdlist)
     QString func = cmdlist.value(1, "");
 
     if (func == "?")
-        answer = QString("RECORD\n");
+        answer = QString("RECORD BW_WIN_RATIO\n");
     else if (func.compare("RECORD", Qt::CaseInsensitive) == 0)
         answer = QString("%1\n").arg(audio_recorder_status);
+    else if (func.compare("BW_WIN_RATIO", Qt::CaseInsensitive) == 0)
+        answer = QString("%1\n").arg(bw_win_ratio);
     else
         answer = QString("RPRT 1\n");
 
@@ -635,11 +660,11 @@ QString RemoteControl::cmd_set_func(QStringList cmdlist)
     bool ok;
     QString answer;
     QString func = cmdlist.value(1, "");
-    int     status = cmdlist.value(2, "ERR").toInt(&ok);
+    int     func_arg = cmdlist.value(2, "ERR").toInt(&ok);
 
     if (func == "?")
     {
-        answer = QString("RECORD\n");
+        answer = QString("RECORD BW_WIN_RATIO\n");
     }
     else if ((func.compare("RECORD", Qt::CaseInsensitive) == 0) && ok)
     {
@@ -650,12 +675,19 @@ QString RemoteControl::cmd_set_func(QStringList cmdlist)
         else
         {
             answer = QString("RPRT 0\n");
-            audio_recorder_status = status;
-            if (status)
+            audio_recorder_status = func_arg;
+            if (func_arg)
                 emit startAudioRecorderEvent();
             else
                 emit stopAudioRecorderEvent();
         }
+    }
+    else if ((func.compare("BW_WIN_RATIO", Qt::CaseInsensitive) == 0) && ok)
+    {
+        if ( func_arg >= 0 && func_arg <= 100)
+           bw_win_ratio = func_arg;
+        else
+           answer = QString("RPRT 1\n");
     }
     else
     {
