@@ -61,6 +61,10 @@ void DockInputCtl::readSettings(QSettings * settings)
     setIqBalance(settings->value("input/iq_balance", false).toBool());
     emit iqBalanceChanged(ui->iqBalanceButton->isChecked());
 
+    bool_val = settings->value("input/ignore_limits", false).toBool();
+    setIgnoreLimits(bool_val);
+    emit ignoreLimitsChanged(bool_val);
+
     lnb_lo = settings->value("input/lnb_lo", 0).toLongLong(&conv_ok);
     if (conv_ok)
     {
@@ -68,15 +72,12 @@ void DockInputCtl::readSettings(QSettings * settings)
         emit lnbLoChanged(ui->lnbSpinBox->value());
     }
 
-    bool_val = settings->value("input/ignore_limits", false).toBool();
-    setIgnoreLimits(bool_val);
-    emit ignoreLimitsChanged(bool_val);
-
     // Ignore antenna selection if there is only one option
     if (ui->antSelector->count() > 1)
     {
         QString ant = settings->value("input/antenna", "").toString();
         setAntenna(ant);
+        emit antennaSelected(ant);
     }
 
     // gains are stored as a QMap<QString, QVariant(int)>
@@ -96,8 +97,8 @@ void DockInputCtl::readSettings(QSettings * settings)
 
             gain_name = gain_iter.key();
             gain_value = 0.1 * (double)(gain_iter.value().toInt());
-            setGain(gain_name, gain_value);
-            emit gainChanged(gain_name, gain_value);
+            if (setGain(gain_name, gain_value))
+                emit gainChanged(gain_name, gain_value);
         }
     }
 
@@ -200,9 +201,10 @@ double DockInputCtl::lnbLo()
  * @param name The name of the gain to change.
  * @param value The new value.
  */
-void DockInputCtl::setGain(QString &name, double value)
+bool DockInputCtl::setGain(QString name, double value)
 {
     int gain = -1;
+    bool success = false;
 
     for (int idx = 0; idx < gain_labels.length(); idx++)
     {
@@ -210,9 +212,12 @@ void DockInputCtl::setGain(QString &name, double value)
         {
             gain = (int)(10 * value);
             gain_sliders.at(idx)->setValue(gain);
+            success = true;
             break;
         }
     }
+
+    return success;
 }
 
 /**

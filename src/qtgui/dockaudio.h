@@ -70,6 +70,7 @@ public slots:
     void startAudioRecorder(void);
     void stopAudioRecorder(void);
     void setRxFrequency(qint64 freq);
+    void setWfColormap(const QString &cmap);
 
 signals:
     /*! \brief Signal emitted when audio gain has changed. Gain is in dB. */
@@ -102,6 +103,7 @@ private slots:
     void on_audioRecButton_clicked(bool checked);
     void on_audioPlayButton_clicked(bool checked);
     void on_audioConfButton_clicked();
+    void on_audioMuteButton_clicked(bool checked);
     void setNewPandapterRange(int min, int max);
     void setNewWaterfallRange(int min, int max);
     void setNewRecDir(const QString &dir);
