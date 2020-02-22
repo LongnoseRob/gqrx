@@ -44,6 +44,7 @@ std::string receiver::get_random_file(void)
                 QDataStream stream(&temp_file);
                 for (size_t i = 0; i < 1024*8; i++) stream << qint8(rand());
             }
+            temp_file.close();
             std::cout << "Created random file " << path << std::endl;
         }
     }
