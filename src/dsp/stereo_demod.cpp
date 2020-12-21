@@ -1,7 +1,7 @@
 /* -*- c++ -*- */
 /*
  * Gqrx SDR: Software defined radio receiver powered by GNU Radio and Qt
- *           http://gqrx.dk/
+ *           https://gqrx.dk/
  *
  * Copyright 2012 Alexandru Csete OZ9AEC.
  * FM stereo implementation by Alex Grinkov a.grinkov(at)gmail.com.
@@ -36,12 +36,10 @@ stereo_demod_sptr make_stereo_demod(float quad_rate, float audio_rate,
 }
 
 
-static const int MIN_IN  = 1; /* Mininum number of input streams. */
+static const int MIN_IN  = 1; /* Minimum number of input streams. */
 static const int MAX_IN  = 1; /* Maximum number of input streams. */
 static const int MIN_OUT = 2; /* Minimum number of output streams. */
 static const int MAX_OUT = 2; /* Maximum number of output streams. */
-
-#define STEREO_DEMOD_PARANOIC
 
 /*! \brief Create stereo demodulator object.
  *
@@ -95,7 +93,6 @@ stereo_demod::stereo_demod(float input_rate, float audio_rate, bool stereo, bool
 
     lo = gr::blocks::complex_to_imag::make();
 
-#ifdef STEREO_DEMOD_PARANOIC
     d_pll_taps = gr::filter::firdes::band_pass(
                                        1.0,          // gain,
 		                                   d_input_rate, // sampling_freq
@@ -103,7 +100,6 @@ stereo_demod::stereo_demod(float input_rate, float audio_rate, bool stereo, bool
                                        38400.,       // high_cutoff_freq
                                        400.);        // transition_width
     lo2 = gr::filter::fir_filter_fff::make(1, d_pll_taps);
-#endif
 
     mixer = gr::blocks::multiply_ff::make();
 
@@ -121,12 +117,8 @@ stereo_demod::stereo_demod(float input_rate, float audio_rate, bool stereo, bool
         connect(pll, 0, subtone, 1);
         connect(subtone, 0, lo, 0);
 
-#ifdef STEREO_DEMOD_PARANOIC
         connect(lo,  0, lo2, 0);
         connect(lo2, 0, mixer, 0);
-#else
-        connect(lo, 0, mixer, 0);
-#endif
     } else {
         connect(self(), 0, tone, 0);
         connect(tone, 0, pll, 0);

@@ -1,10 +1,10 @@
 /* -*- c++ -*- */
 /*
  * Gqrx SDR: Software defined radio receiver powered by GNU Radio and Qt
- *           http://gqrx.dk/
+ *           https://gqrx.dk/
  *
  * Copyright 2011 Alexandru Csete OZ9AEC.
- *
+ * 
  * Gqrx is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
@@ -31,7 +31,7 @@
 #include <stdarg.h>
 #include "dsp/rx_rds.h"
 
-static const int MIN_IN = 1;  /* Mininum number of input streams. */
+static const int MIN_IN = 1;  /* Minimum number of input streams. */
 static const int MAX_IN = 1;  /* Maximum number of input streams. */
 static const int MIN_OUT = 1; /* Minimum number of output streams. */
 static const int MAX_OUT = 1; /* Maximum number of output streams. */
@@ -56,14 +56,16 @@ rx_rds::rx_rds(double sample_rate)
                       gr::io_signature::make (MIN_OUT, MAX_OUT, sizeof (char))),
       d_sample_rate(sample_rate)
 {
-    const int decimation = d_sample_rate / 2375;
-
     d_taps2 = gr::filter::firdes::low_pass(2500.0, d_sample_rate, 2400, 2000);
 
-    f_fxff = gr::filter::freq_xlating_fir_filter_fcf::make(decimation, d_taps2, 57000, d_sample_rate);
+    f_fxff = gr::filter::freq_xlating_fir_filter_fcf::make(1, d_taps2, 57000, d_sample_rate);
 
-    f_rrcf = gr::filter::firdes::root_raised_cosine(1, sample_rate/decimation, 2375, 1, 100);
+    d_rsmp_tap = gr::filter::firdes::low_pass(10, d_sample_rate, 2375, 2000);
+    d_rsmp = gr::filter::pfb_arb_resampler_ccf::make(2375/d_sample_rate,d_rsmp_tap,32);
+
+    f_rrcf = gr::filter::firdes::root_raised_cosine(1, 2375, 2375, 1, 100);
     d_bpf2 = gr::filter::fir_filter_ccf::make(1, f_rrcf);
+
 
     gr::digital::constellation_sptr p_c = gr::digital::constellation_bpsk::make()->base();
     d_mpsk = gr::digital::constellation_receiver_cb::make(p_c, 1*M_PI/100.0, -0.06, 0.06);
@@ -76,8 +78,9 @@ rx_rds::rx_rds(double sample_rate)
     rds_parser = gr::rds::parser::make(1, 0, 0);
 
     /* connect filter */
-    connect(self(), 0, f_fxff, 0);
-    connect(f_fxff, 0, d_bpf2, 0);
+    connect(self(), 0, f_fxff, 0); 
+    connect(f_fxff, 0, d_rsmp, 0); 
+    connect(d_rsmp, 0, d_bpf2, 0);
     connect(d_bpf2, 0, d_mpsk, 0);
     connect(d_mpsk, 0, b_koin, 0);
     connect(b_koin, 0, d_ddbb, 0);
@@ -94,7 +97,7 @@ rx_rds_store::rx_rds_store() : gr::block ("rx_rds_store",
                                 gr::io_signature::make (0, 0, 0))
 {
         message_port_register_in(pmt::mp("store"));
-        set_msg_handler(pmt::mp("store"), boost::bind(&rx_rds_store::store, this, _1));
+        set_msg_handler(pmt::mp("store"), std::bind(&rx_rds_store::store, this, std::placeholders::_1));
         d_messages.set_capacity(100);
 }
 
@@ -105,14 +108,14 @@ rx_rds_store::~rx_rds_store ()
 
 void rx_rds_store::store(pmt::pmt_t msg)
 {
-    boost::mutex::scoped_lock lock(d_mutex);
+    std::lock_guard<std::mutex> lock(d_mutex);
     d_messages.push_back(msg);
 
 }
 
 void rx_rds_store::get_message(std::string &out, int &type)
 {
-    boost::mutex::scoped_lock lock(d_mutex);
+    std::lock_guard<std::mutex> lock(d_mutex);
 
     if (d_messages.size()>0) {
         pmt::pmt_t msg=d_messages.front();

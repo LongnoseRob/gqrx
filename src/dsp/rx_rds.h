@@ -1,7 +1,7 @@
 /* -*- c++ -*- */
 /*
  * Gqrx SDR: Software defined radio receiver powered by GNU Radio and Qt
- *           http://gqrx.dk/
+ *           https://gqrx.dk/
  *
  * Copyright 2015 Alexandru Csete OZ9AEC.
  *
@@ -23,6 +23,7 @@
 #ifndef RX_RDS_H
 #define RX_RDS_H
 
+#include <mutex>
 #include <gnuradio/hier_block2.h>
 
 #if GNURADIO_VERSION < 0x030800
@@ -35,6 +36,7 @@
 #include <gnuradio/filter/fir_filter_blk.h>
 #include <gnuradio/filter/freq_xlating_fir_filter.h>
 #endif
+#include <gnuradio/filter/pfb_arb_resampler_ccf.h>
 
 #include <gnuradio/digital/constellation_receiver_cb.h>
 #include <gnuradio/blocks/keep_one_in_n.h>
@@ -49,8 +51,13 @@
 class rx_rds;
 class rx_rds_store;
 
+#if GNURADIO_VERSION < 0x030900
 typedef boost::shared_ptr<rx_rds> rx_rds_sptr;
 typedef boost::shared_ptr<rx_rds_store> rx_rds_store_sptr;
+#else
+typedef std::shared_ptr<rx_rds> rx_rds_sptr;
+typedef std::shared_ptr<rx_rds_store> rx_rds_store_sptr;
+#endif
 
 
 rx_rds_sptr make_rx_rds(double sample_rate);
@@ -68,7 +75,7 @@ public:
 private:
     void store(pmt::pmt_t msg);
 
-    boost::mutex d_mutex;
+    std::mutex d_mutex;
     boost::circular_buffer<pmt::pmt_t> d_messages;
 
 };
@@ -85,10 +92,10 @@ public:
 private:
     std::vector<gr_complex> d_taps;
     std::vector<float> d_taps2;
-    gr::filter::fir_filter_ccc::sptr  d_bpf;
+    std::vector<float> d_rsmp_tap;
     gr::filter::fir_filter_ccf::sptr  d_bpf2;
     gr::filter::freq_xlating_fir_filter_fcf::sptr f_fxff;
-    gr::filter::freq_xlating_fir_filter_ccf::sptr f_fxff_ccf;
+    gr::filter::pfb_arb_resampler_ccf::sptr d_rsmp;
     std::vector<float> f_rrcf;
     gr::digital::constellation_receiver_cb::sptr d_mpsk;
     gr::blocks::keep_one_in_n::sptr b_koin;

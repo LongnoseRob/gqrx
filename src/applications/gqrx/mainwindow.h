@@ -1,7 +1,7 @@
 /* -*- c++ -*- */
 /*
  * Gqrx SDR: Software defined radio receiver powered by GNU Radio and Qt
- *           http://gqrx.dk/
+ *           https://gqrx.dk/
  *
  * Copyright 2011-2014 Alexandru Csete OZ9AEC.
  *
@@ -41,13 +41,11 @@
 #include "qtgui/dockrds.h"
 #include "qtgui/afsk1200win.h"
 #include "qtgui/iq_tool.h"
+#include "qtgui/dxc_options.h"
 
+#include "applications/gqrx/recentconfig.h"
 #include "applications/gqrx/remote_control.h"
-
-// see https://bugreports.qt-project.org/browse/QTBUG-22829
-#ifndef Q_MOC_RUN
 #include "applications/gqrx/receiver.h"
-#endif
 
 namespace Ui {
     class MainWindow;  /*! The main window UI */
@@ -76,6 +74,7 @@ private:
     QPointer<QSettings> m_settings;  /*!< Application wide settings. */
     QString             m_cfg_dir;   /*!< Default config dir, e.g. XDG_CONFIG_HOME. */
     QString             m_last_dir;
+    RecentConfig       *m_recent_config; /* Menu File Recent config */
 
     qint64 d_lnb_lo;  /* LNB LO in Hz. */
     qint64 d_hw_freq;
@@ -99,6 +98,7 @@ private:
     DockRDS        *uiDockRDS;
 
     CIqTool        *iq_tool;
+    DXCOptions     *dxc_options;
 
 
     /* data decoders */
@@ -126,8 +126,13 @@ private:
     void updateGainStages(bool read_from_device);
     void showSimpleTextFile(const QString &resource_path,
                             const QString &window_title);
+    /* key shortcut */
+    void frequencyFocusShortcut();
 
 private slots:
+    /* RecentConfig */
+    void loadConfigSlot(const QString &cfgfile);
+
     /* rf */
     void setLnbLo(double freq_mhz);
     void setAntenna(const QString antenna);
@@ -142,12 +147,15 @@ private slots:
     void setIqBalance(bool enabled);
     void setIgnoreLimits(bool ignore_limits);
     void setFreqCtrlReset(bool enabled);
+    void setInvertScrolling(bool enabled);
     void selectDemod(QString demod);
     void selectDemod(int index);
     void setFmMaxdev(float max_dev);
     void setFmEmph(double tau);
     void setAmDcr(bool enabled);
     void setCwOffset(int offset);
+    void setAmSyncDcr(bool enabled);
+    void setAmSyncPllBw(float pll_bw);
     void setAgcOn(bool agc_on);
     void setAgcHang(bool use_hang);
     void setAgcThreshold(int threshold);
@@ -193,13 +201,15 @@ private slots:
     /* FFT plot */
     void on_plotter_newDemodFreq(qint64 freq, qint64 delta);   /*! New demod freq (aka. filter offset). */
     void on_plotter_newFilterFreq(int low, int high);    /*! New filter width */
-    void on_plotter_newCenterFreq(qint64 f);
 
     /* RDS */
     void setRdsDecoder(bool checked);
 
     /* Bookmarks */
     void onBookmarkActivated(qint64 freq, QString demod, int bandwidth);
+
+    /* DXC Spots */
+    void updateClusterSpots();
 
     /* menu and toolbar actions */
     void on_actionDSP_triggered(bool checked);
@@ -215,9 +225,11 @@ private slots:
     void on_actionUserGroup_triggered();
     void on_actionNews_triggered();
     void on_actionRemoteProtocol_triggered();
+    void on_actionKbdShortcuts_triggered();
     void on_actionAbout_triggered();
     void on_actionAboutQt_triggered();
     void on_actionAddBookmark_triggered();
+    void on_actionDX_Cluster_triggered();
 
 
     /* window close signals */
